@@ -17,7 +17,7 @@ from translation_model import TranslationModel, load_checkpoint
 
 parser = argparse.ArgumentParser()
 parser.add_argument('config', help='load a configuration file in the YAML format')
-parser.add_argument('-v', '--verbose', action='store_true', help='verbose mode')
+parser.add_argument('-v', '--verbose', action='store_true', help='verbose mode')  # determine the logging mode
 parser.add_argument('--debug', action='store_true', help='debug mode')
 
 # using 'store_const' instead of 'store_true' so that the default value is `None` instead of `False`
@@ -183,7 +183,8 @@ def main(args=None):
     log_path = os.path.join(config.model_dir, config.log_file)
     logger = utils.create_logger(log_path if args.train else None)
     logger.setLevel(logging_level)
-
+    
+    # the label and description of the yaml file
     utils.log('label: {}'.format(config.label))
     utils.log('description:\n  {}'.format('\n  '.join(config.description.strip().split('\n'))))
 
@@ -201,9 +202,10 @@ def main(args=None):
     for k, v in sorted(config.items(), key=itemgetter(0)):
         utils.debug('  {:<20} {}'.format(k, pformat(v)))
 
+    # dev_prefix: # names of the development corpora
     if isinstance(config.dev_prefix, str):
         config.dev_prefix = [config.dev_prefix]
-
+    # encoder and decode are all dictionary containing all the params
     config.encoders = [utils.AttrDict(encoder) for encoder in config.encoders]
     config.decoders = [utils.AttrDict(decoder) for decoder in config.decoders]
 
@@ -263,6 +265,7 @@ def main(args=None):
     with tf.Session(config=tf_config, graph=transfer_graph) as sess:
         utils.log('creating model')
         utils.log('using device: {}'.format(device))
+        # ?? question here
         with tf.device(device):
             if config.weight_scale:
                 if config.initializer == 'uniform':
@@ -275,7 +278,7 @@ def main(args=None):
             tf.get_variable_scope().set_initializer(initializer)
 
             # exempt from creating gradient ops
-            config.decode_only = decoding_mode
+            config.decode_only = decoding_mode  # use an existing model to translate
             model = TranslationModel(**config)
 
         # count parameters

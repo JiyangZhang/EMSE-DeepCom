@@ -46,6 +46,9 @@ Command: `perl multi-bleu.perl reference < predictions`
 ## The METEOR evaluation by meteor 1.5:
 Command: `java -Xmx2G -jar meteor-1.5.jar predictions reference -l en -norm`
 
+## Train
+python __main__.py ../config/**.yaml --train -v
+
 reference: the ground-truth file (the test.token.nl file in our dataset).
 predictions: the generated comments file.
 Each line represents one sample.
